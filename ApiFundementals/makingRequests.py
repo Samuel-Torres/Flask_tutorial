@@ -50,6 +50,7 @@ import requests
 
 # One way to send params through get request:
 # "https://api.sunrise-sunset.org/json?lat=41.554260&lng=-73.043068&date=today"
+
 res = requests.get(
     "https://api.sunrise-sunset.org/json", params={"lat": 41.554260, "lng": -73.043068}
 )
