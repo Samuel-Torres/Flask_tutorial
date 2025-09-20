@@ -56,3 +56,6 @@ res = requests.get(
 )
 data = res.json()
 print("RESP: ", data)
+
+# Access nested:
+# print("RESP: ", data["results"]["sunrise"])
