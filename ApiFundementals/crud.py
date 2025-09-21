@@ -45,11 +45,11 @@ import requests
 # PUT/PATCH:
 
 
-# getRes = requests.get("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
-# data = getRes.json()
-# # print("FETCH POST 101 RESP: ", data)
+getRes = requests.get("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
+data = getRes.json()
+# print("FETCH POST 101 RESP: ", data)
 
-# postId = data["id"]
+postId = data["id"]
 
 # payload = {
 #     "userId": data["userId"],
@@ -57,18 +57,25 @@ import requests
 #     "title": "New Title",
 #     "body": "This is my new post",
 # }
-# # print("payload to update: ", payload)
+patchPayload = {
+    # using patch you can just put the fields you're updating in the payload and ignore all others
+    "title": "New Title",
+    "body": "This is my new post",
+}
+# print("payload to update: ", payload)
 # putRes = requests.put(
-#     f"https://jsonplaceholder.typicode.com/posts/{postId}",
-#     timeout=10,
-#     headers={"Content-type": "application/json; charset=UTF-8"},
-#     json=payload,
-# )
-# putData = putRes.json()
-# print("FINAL: ", {"status": putRes.status_code, "response": putData})
+putRes = requests.patch(
+    f"https://jsonplaceholder.typicode.com/posts/{postId}",
+    timeout=10,
+    headers={"Content-type": "application/json; charset=UTF-8"},
+    json=patchPayload,
+    # json=payload,
+)
+putData = putRes.json()
+print("FINAL: ", {"status": putRes.status_code, "response": putData})
 
 # DELETE
 
-deleteRes = requests.delete("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
-deleteData = deleteRes.json()
-print("DELETION RESPONSE: ", deleteRes)
+# deleteRes = requests.delete("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
+# deleteData = deleteRes.json()
+# print("DELETION RESPONSE: ", deleteRes)
