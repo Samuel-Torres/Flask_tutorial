@@ -26,29 +26,49 @@ import requests
 
 # POST:
 
-payload = {
-    "userId": 1,
-    "title": "Test post by Samuel Torres.",
-    "body": "Here is my test post",
-}
-postRes = requests.post(
-    "https://jsonplaceholder.typicode.com/posts",
-    json=payload,
-    headers={"Content-type": "application/json; charset=UTF-8"},
-    timeout=10,
-)
-postData = print({"status": postRes.status_code, "response": postRes.json()})
+# payload = {
+#     "userId": 1,
+#     "title": "Test post by Samuel Torres.",
+#     "body": "Here is my test post",
+# }
+# postRes = requests.post(
+#     "https://jsonplaceholder.typicode.com/posts",
+#     json=payload,
+#     headers={"Content-type": "application/json; charset=UTF-8"},
+#     timeout=10,
+# )
+# postData = print({"status": postRes.status_code, "response": postRes.json()})
 
 
 # _____________________________________________
 
 # PUT/PATCH:
 
-# payload = {}
-# putRes = requests.put()
+
+# getRes = requests.get("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
+# data = getRes.json()
+# # print("FETCH POST 101 RESP: ", data)
+
+# postId = data["id"]
+
+# payload = {
+#     "userId": data["userId"],
+#     "id": data["id"],
+#     "title": "New Title",
+#     "body": "This is my new post",
+# }
+# # print("payload to update: ", payload)
+# putRes = requests.put(
+#     f"https://jsonplaceholder.typicode.com/posts/{postId}",
+#     timeout=10,
+#     headers={"Content-type": "application/json; charset=UTF-8"},
+#     json=payload,
+# )
 # putData = putRes.json()
+# print("FINAL: ", {"status": putRes.status_code, "response": putData})
 
 # DELETE
 
-# deleteRes = requests.put()
-# deleteData = deleteRes.json()
+deleteRes = requests.delete("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
+deleteData = deleteRes.json()
+print("DELETION RESPONSE: ", deleteRes)
