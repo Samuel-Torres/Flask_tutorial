@@ -14,7 +14,7 @@ app.register_blueprint(users)
 @app.route("/")
 def hello_world():
     "Project Initialization"
-    return "<h1>Hello World!</h1>"
+    return "<h1>Hello World!</h1>", 200
 
 
 if __name__ == "__main__":
