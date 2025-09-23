@@ -4,8 +4,21 @@ Home
 
 from flask import Flask
 from endpoints.users.users import users
+import sqlite3
 
 app = Flask(__name__)
+
+# SQLite initialization:
+connection = sqlite3.connect("database")
+cursor = connection.cursor()
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS Users (user_id INT, user_name TEXT, password TEXT)
+"""
+)
+connection.commit()
+connection.close()
+
 
 # Route Registrations:
 app.register_blueprint(users)
