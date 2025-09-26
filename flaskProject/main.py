@@ -6,17 +6,17 @@ pip install flask sqlalchemy flask-sqlalchemy
 """
 
 from flask import Flask
-from sqlalchemy import create_engine
+
+# from sqlalchemy import create_engine
+# from sqlalchemy.orm import sessionmaker
+from flaskProject.db_setup import init_db
 from flaskProject.endpoints import register_blueprints
-from .models import Base
-from . import (  # pylint: disable=unused-import # this auto-imports models via models/__init__.py
-    models,
-)
+
 
 app = Flask(__name__)
-engine = create_engine("sqlite:///database")
-Base.metadata.create_all(engine)
 
+# Initialize DB and session
+init_db("sqlite:///flaskProject/database")
 
 # Auto-register all blueprints
 register_blueprints(app)
