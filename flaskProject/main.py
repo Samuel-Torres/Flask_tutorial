@@ -6,9 +6,6 @@ pip install flask sqlalchemy flask-sqlalchemy
 """
 
 from flask import Flask
-
-# from sqlalchemy import create_engine
-# from sqlalchemy.orm import sessionmaker
 from flaskProject.db_setup import init_db
 from flaskProject.endpoints import register_blueprints
 
