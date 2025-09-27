@@ -6,6 +6,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from flaskProject.models.users_model import Users
 from flaskProject.db_setup import Session
+from flaskProject.main import bcrypt
 
 users = Blueprint("users", __name__)
 
@@ -26,25 +27,44 @@ def get_users_by_id():
 
 @users.route("/users", methods=["POST"])
 def create_user():
-    "Create a new user"
+    "Create a new user with password hashing and database verification"
     data = request.get_json()
     session = Session()
+
     try:
-        new_user = Users(user_name=data["user_name"], password=data["password"])
+        # Hash the password before storing
+        hashed_pw = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
+
+        # Create new user
+        new_user = Users(user_name=data["user_name"], password=hashed_pw)
         session.add(new_user)
         session.commit()
-        session.refresh(new_user)
+        session.refresh(new_user)  # reload from DB
 
-        if new_user.user_id:
-            return (
-                jsonify(
-                    message=f"User {new_user.user_name} created with ID: {new_user.user_id}"
-                ),
-                201,
-            )
-        else:
+        # Verify persisted values
+        mismatches = []
+
+        if new_user.user_name != data["user_name"]:
+            mismatches.append("user_name")
+
+        # Verify password matches input using bcrypt
+        if not bcrypt.check_password_hash(new_user.password, data["password"]):
+            mismatches.append("password")
+
+        # If any mismatch, rollback and return error
+        if mismatches:
             session.rollback()
-            return jsonify(message="Failed to create user."), 500
+            return (
+                jsonify(message=f"Creation failed for fields: {', '.join(mismatches)}"),
+                500,
+            )
+
+        return (
+            jsonify(
+                message=f"User {new_user.user_name} created with ID: {new_user.user_id}"
+            ),
+            201,
+        )
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -56,9 +76,10 @@ def create_user():
 
 @users.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
-    "Update an existing user"
+    "Update an existing user with bcrypt password hashing"
     data = request.get_json()
     session = Session()
+
     try:
         # Fetch the user by ID
         user = session.get(Users, user_id)
@@ -68,19 +89,30 @@ def update_user(user_id):
         # Update fields if provided
         if "user_name" in data:
             user.user_name = data["user_name"]
+
         if "password" in data:
-            user.password = data["password"]
+            # Hash the new password
+            hashed_pw = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
+            user.password = hashed_pw
 
+        # Commit changes to DB
         session.commit()
-        session.refresh(user)  # reloads from DB
+        session.refresh(user)  # reload user from DB
 
-        # Verify persisted values
+        # Verify updates
         mismatches = []
+
+        # Check username
         if "user_name" in data and user.user_name != data["user_name"]:
             mismatches.append("user_name")
-        if "password" in data and user.password != data["password"]:
+
+        # Verify password matches input using bcrypt
+        if "password" in data and not bcrypt.check_password_hash(
+            user.password, data["password"]
+        ):
             mismatches.append("password")
 
+        # If any mismatches, rollback and return error
         if mismatches:
             session.rollback()
             return (

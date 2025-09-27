@@ -16,6 +16,6 @@ Session = None
 def init_db(db_path: str):
     """Initialize the database engine and sessionmaker."""
     global engine, Session
-    engine = create_engine(db_path)
-    Base.metadata.create_all(engine)
+    engine = create_engine(db_path, echo=True)
     Session = sessionmaker(bind=engine)
+    Base.metadata.create_all(engine)
