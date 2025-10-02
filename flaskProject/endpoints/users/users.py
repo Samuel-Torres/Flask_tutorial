@@ -9,7 +9,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from flaskProject.models.users_model import Users
 from flaskProject.db_setup import Session
 from flaskProject.app import bcrypt
-from flaskProject.middleware.verify_user_credentials import verify_user_credentials
+from flaskProject.utilities.verify_user_credentials import verify_user_credentials
 users = Blueprint("users", __name__)
 auth = HTTPBasicAuth()
 
@@ -55,22 +55,6 @@ def get_logged_in_user():
         ), 200
     finally:
         session.close()
-
-
-# ---------------------------
-# Authentication
-# ---------------------------
-@auth.verify_password
-def verify_password(username, password):
-    """Verify user credentials from the database"""
-    session = Session()
-    try:
-        user = session.query(Users).filter_by(user_name=username).first()
-        if user and bcrypt.check_password_hash(user.password, password):
-            return user
-    finally:
-        session.close()
-    return None
 
 
 # @users.route("/users")
