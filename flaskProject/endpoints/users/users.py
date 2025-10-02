@@ -2,6 +2,7 @@
 Users Model
 """
 
+from flask_httpauth import HTTPBasicAuth
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from flaskProject.models.users_model import Users
@@ -9,6 +10,23 @@ from flaskProject.db_setup import Session
 from flaskProject.app import bcrypt
 
 users = Blueprint("users", __name__)
+auth = HTTPBasicAuth()
+
+
+# ---------------------------
+# Authentication
+# ---------------------------
+@auth.verify_password
+def verify_password(username, password):
+    """Verify user credentials from the database"""
+    session = Session()
+    try:
+        user = session.query(Users).filter_by(user_name=username).first()
+        if user and bcrypt.check_password_hash(user.password, password):
+            return user
+    finally:
+        session.close()
+    return None
 
 
 # @users.route("/users")
@@ -92,6 +110,7 @@ def create_user():
 
 
 @users.route("/users/<int:user_id>", methods=["PUT"])
+@auth.login_required
 def update_user(user_id):
     "Update an existing user with bcrypt password hashing"
     data = request.get_json()
