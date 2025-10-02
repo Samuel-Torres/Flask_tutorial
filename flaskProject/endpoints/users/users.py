@@ -9,7 +9,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from flaskProject.models.users_model import Users
 from flaskProject.db_setup import Session
 from flaskProject.app import bcrypt
-
+from flaskProject.middleware.verify_user_credentials import verify_user_credentials
 users = Blueprint("users", __name__)
 auth = HTTPBasicAuth()
 
@@ -19,20 +19,25 @@ auth = HTTPBasicAuth()
 @users.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    username = data.get("username")
+    username = data.get("user_name")
     password = data.get("password")
 
-    # here you’d query your Users model
-    # just an example:
-    if username == "test" and password == "password":
-        access_token = create_access_token(identity=username)
-        return jsonify(access_token=access_token), 200
+    check_user = verify_user_credentials(username, password)
+    if not check_user:
+        return jsonify({"msg": "Invalid credentials"}), 401
     
-    return jsonify({"msg": "Invalid credentials"}), 401
+    access_token = create_access_token(identity=str(check_user.user_id))
+    return jsonify({
+        "access_token": access_token,
+        "user_id": check_user.user_id,
+        "user_name": check_user.user_name,
+        "user_password": check_user.password,
+        "message": "Login successful"
+    }), 200
 
 
 # ----------------------
-# Example: Protected route
+# Protected route
 # ----------------------
 @users.route("/me", methods=["GET"])
 @jwt_required()
@@ -46,6 +51,7 @@ def get_logged_in_user():
         return jsonify(
             user_id=user.user_id,
             user_name=user.user_name,
+            user_password=user.password
         ), 200
     finally:
         session.close()
