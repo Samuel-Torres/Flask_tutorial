@@ -6,23 +6,40 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from flaskProject.models.users_model import Users
 from flaskProject.db_setup import Session
-from flaskProject.main import bcrypt
+from flaskProject.app import bcrypt
 
 users = Blueprint("users", __name__)
 
 
-@users.route("/users")
+# @users.route("/users")
+# Can Also use the pattern below to specify methods:
+@users.route("/users", methods=["GET"])
 def get_users():
-    "Project Initialization"
-    return jsonify(message="Hello from users!"), 200
+    "Gets all users from the database"
+    session = Session()
+    try:
+        all_users = session.query(Users).all()
 
+        users_list = [
+            {
+                "user_id": user.user_id,
+                "user_name": user.user_name,
+                "password": user.password,
+            }
+            for user in all_users
+        ]
 
-# Query Paramaters Example:
-@users.route("/userById")
-def get_users_by_id():
-    "Get user by userId"
-    # Request.args.get, gets your query param by name
-    return jsonify(message=f"Found User by ID: {int(request.args.get('userId'))}"), 200
+        if not users_list:
+            return jsonify(message="User table found, but is empty."), 200
+
+        return jsonify(users=users_list), 200
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        return jsonify(message=f"Database error: {str(e)}"), 500
+
+    finally:
+        session.close()
 
 
 @users.route("/users", methods=["POST"])
@@ -169,10 +186,3 @@ def delete_user(user_id):
 def get_user_by_userid(user_id: int):
     "Fetch user by userId"
     return jsonify(message=f"Found user by ID: {user_id}"), 200
-
-
-# Example of how to throw status codes
-@users.route("/error")
-def error():
-    "erroring example"
-    return jsonify(message="404 Not Found"), 404

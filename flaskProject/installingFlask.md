@@ -25,4 +25,4 @@ $ flask run --host=0.0.0.0
 This tells your operating system to listen on all public IPs.
 
 % Run with auto reload abilities
-flask --app flaskProject/main run --reload
+flask --app flaskProject/app run --reload
